@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Логистическая регрессия{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Логистическая регрессия</h2>
+<div class="row equal-height-row">
+    <div class="col-md-4">
+        <div class="card data-input-card">
+            <div class="card-header">Ввод</div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Независимые переменные Х</label>
+                        <input type="text" name="x_values" class="form-control" value="{{ x_values }}" placeholder="Введите значения через запятую">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Зависимые переменные Y (0 или 1)</label>
+                        <input type="text" name="y_values" class="form-control" value="{{ y_values }}" placeholder="Введите 0 или 1 через запятую">
+                    </div>
+				<hr>
+                <h5>Или загрузите данные из файла:</h5>
+				<p>Форматы: CSV, XLS или XLSX. Первая строка считается заголовком. Сравнивается до 20 значений из первых двух колонок.</p>
+                <input type="file" name="data_file" class="form-control">
+                    <button type="submit" class="btn btn-primary">Провести испытание</button>
+                </form>
+            </div>
+        </div>
+        {% if result %}
+        <div class="card result-card">
+            <div class="card-header">Результаты</div>
+            <div class="card-body">
+                <p><strong>Коэффициент:</strong> {{ "%.4f"|format(result.coef) }}</p>
+                <p><strong>Точка пересечения:</strong> {{ "%.4f"|format(result.intercept) }}</p>
+                <p><strong>Точность:</strong> {{ "%.4f"|format(result.accuracy) }}</p>
+				<p><strong>Вывод:</strong> {{ conclusion }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-8">
+        {% if plots and plots.regression_plot %}
+        <div class="card plot-card">
+            <div class="card-body">
+                <div id="regressionPlot">{{ plots.regression_plot|safe }}</div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">Введите значения и проведите испытание</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

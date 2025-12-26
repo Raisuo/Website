@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Корреляция Пирсона{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2 class="mb-4">Корреляция Пирсона</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card data-input-card mb-4">
+                <div class="card-header">Ввод</div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">Первый ряд</label>
+                            <input type="text" name="var1" class="form-control" value="{{ var1 }}" placeholder="Введите значения через запятую">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Второй ряд</label>
+                            <input type="text" name="var2" class="form-control" value="{{ var2 }}" placeholder="Введите значения через запятую">
+                        </div>
+					<hr>
+					<h5>Или загрузите данные из файла:</h5>
+					<p>Форматы: CSV, XLS или XLSX. Первая строка считается заголовком. Сравнивается до 20 значений из первых двух колонок.</p>
+					<input type="file" name="data_file" class="form-control">
+                        <button type="submit" class="btn btn-primary">Провести испытание</button>
+                    </form>
+                </div>
+            </div>
+            {% if result %}
+            <div class="card result-card mb-4">
+                <div class="card-header">Результаты</div>
+                <div class="card-body">
+                    <p><strong>Коэффициент корреляции:</strong> {{ "%.4f"|format(result.statistic) }}</p>
+                    <p><strong>p-значение:</strong> {{ "%.4f"|format(result.pvalue) }}</p>
+                    <p class="text-{% if result.pvalue < 0.05 %}danger{% else %}success{% endif %}"><strong>Вывод:</strong> {{ conclusion }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            {% if plots %}
+                {% if plots.error %}
+                    <div class="alert alert-danger">
+                        Error generating plots: {{ plots.error }}
+                    </div>
+                {% else %}
+                    <div class="card plot-card mb-4">
+                        <div class="card-header">Сравнение рядов</div>
+                        <div class="card-body p-0">
+                            <div class="plot-container" style="height: 600px;">
+                                {{ plots.scatter|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card plot-card mb-4">
+                                <div class="card-header">Распределение первого ряда</div>
+                                <div class="card-body p-0">
+                                    <div class="plot-container">
+                                        {{ plots.hist1|safe }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card plot-card mb-4">
+                                <div class="card-header">Распределение второго ряда</div>
+                                <div class="card-body p-0">
+                                    <div class="plot-container">
+                                        {{ plots.hist2|safe }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">Введите значения и проведите испытание</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

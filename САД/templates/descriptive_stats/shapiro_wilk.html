@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Тест Шапиро-Уилка{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Тест Шапиро-Уилка</h2>
+<div class="row equal-height-row">
+    <div class="col-md-4">
+        <div class="card data-input-card">
+            <div class="card-header">Ввод</div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Значения</label>
+                        <input type="text" name="data" class="form-control" value="{{ data_input }}" placeholder="Введите значения через запятую">
+                    </div>
+				<hr>
+                <h5>Или загрузите данные из файла:</h5>
+				<p>Форматы: CSV, XLS или XLSX. Первая строка считается заголовком. Сравнивается до 20 значений из первой колонки.</p>
+                <input type="file" name="data_file" class="form-control">
+                    <button type="submit" class="btn btn-primary">Провести испытание</button>
+                </form>
+            </div>
+        </div>
+        {% if result %}
+        <div class="card result-card">
+            <div class="card-header">Результаты</div>
+            <div class="card-body">
+                <p><strong>W-критерий:</strong> {{ "%.4f"|format(result.statistic) }}</p>
+                <p><strong>p-значение:</strong> {{ "%.4f"|format(result.pvalue) }}</p>
+                <p class="text-{% if result.pvalue > 0.05 %}success{% else %}danger{% endif %}"><strong>Вывод:</strong> {{ conclusion }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-8">
+        {% if plots %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card plot-card">
+                    <div class="card-body">
+                        <div id="distPlot">{{ plots.distplot|safe }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card plot-card">
+                    <div class="card-body">
+                        <div id="qqPlot">{{ plots.qqplot|safe }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">Введите значения и проведите испытание</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

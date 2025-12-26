@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Точный тест Фишера{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Точный тест Фишера</h2>
+<div class="row equal-height-row">
+    <div class="col-md-4">
+        <div class="card data-input-card" style="overflow-y: auto; max-height: 80vh;">
+            <div class="card-header">Ввод значений в таблицу сопряжённости</div>
+            <div class="card-body">
+                <form method="post">
+                     <div class="row mb-2">
+                        <div class="col">
+                            <input type="number" name="a" class="form-control" value="{{ a }}" placeholder="a" min="0">
+                        </div>
+                        <div class="col">
+                            <input type="number" name="b" class="form-control" value="{{ b }}" placeholder="b" min="0">
+                        </div>
+                    </div>
+                     <div class="row mb-3">
+                        <div class="col">
+                            <input type="number" name="c" class="form-control" value="{{ c }}" placeholder="c" min="0">
+                        </div>
+                        <div class="col">
+                            <input type="number" name="d" class="form-control" value="{{ d }}" placeholder="d" min="0">
+                        </div>
+                    </div>
+					<div class="row mb-3">  <!-- Новый ряд для alpha -->
+						<div class="col">
+							<label for="alpha">Уровень значимости (alpha):</label>
+							<input type="number" name="alpha" class="form-control" id="alpha" value="{{ alpha }}" placeholder="alpha" min="0" max="1" step="0.01">
+						</div>
+					</div>
+                    <button type="submit" class="btn btn-primary">Провести испытание</button>
+                </form>
+                 <p class="text-muted small mt-2">
+                    <strong>Формат таблицы:</strong><br>
+                    Первая группа: успех={{ a }}, провал={{ b }}<br>
+                    Вторая группа: успех={{ c }}, провал={{ d }}
+                </p>
+            </div>
+        </div>
+        {% if result %}
+        <div class="card result-card">
+            <div class="card-header">Результаты</div>
+            <div class="card-body">
+                 {% if result.error %}
+                    <p class="text-danger"><strong>Error:</strong> {{ result.error }}</p>
+                 {% else %}
+                    <p><strong>Отношение шансов:</strong> {{ "%.4f"|format(result.odds_ratio) }}</p>
+                    <p><strong>p-значение:</strong> {{ "%.4f"|format(result.pvalue) }}</p>
+                    <p class="text-{% if result.pvalue < 0.05 %}danger{% else %}success{% endif %}"><strong>Вывод:</strong> {{ conclusion }}</p>
+                 {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-8">
+        {% if plots %}
+        <div class="card plot-card">
+            <div class="card-body">
+                <div id="barplot">{{ plots.barplot|safe }}</div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">Введите значения и проведите испытание</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

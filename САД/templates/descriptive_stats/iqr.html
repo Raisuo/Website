@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Межквартильный размах (IQR){% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Межквартильный размах (IQR)</h2>
+<div class="row equal-height-row">
+    <div class="col-md-4">
+        <div class="card data-input-card">
+            <div class="card-header">Ввод</div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Значения</label>
+                        <input type="text" name="data" class="form-control" value="{{ data_input }}" placeholder="Введите значения через запятую">
+                    </div>
+				<hr>
+                <h5>Или загрузите данные из файла:</h5>
+				<p>Форматы: CSV, XLS или XLSX. Первая строка считается заголовком. Сравнивается до 20 значений из первой колонки</p>
+                <input type="file" name="data_file" class="form-control">
+                    <button type="submit" class="btn btn-primary">Провести испытание</button>
+                </form>
+            </div>
+        </div>
+        {% if result %}
+        <div class="card result-card">
+            <div class="card-header">Результаты</div>
+            <div class="card-body">
+                <p><strong>Q1 (25-й процентиль):</strong> {{ "%.4f"|format(result.q25) }}</p>
+                <p><strong>Q3 (75-й процентиль):</strong> {{ "%.4f"|format(result.q75) }}</p>
+                <p><strong>Межквартильный размах IQR (Q3 - Q1):</strong> {{ "%.4f"|format(result.iqr) }}</p>
+                <p><strong>Нижняя граница (Q1 - 1.5*IQR):</strong> {{ "%.4f"|format(result.lower_bound) }}</p>
+                <p><strong>Верхняя граница (Q3 + 1.5*IQR):</strong> {{ "%.4f"|format(result.upper_bound) }}</p>
+                <p><strong>Потенциальные выбросы:</strong> {{ result.outliers|join(', ') }}</p>
+				<p><strong>Вывод:</strong> {{ conclusion }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-8">
+    {% if plots %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card plot-card">
+                    <div class="card-body">
+                        <div id="boxplot">{{ plots.boxplot|safe }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card plot-card">
+                    <div class="card-body">
+                        <div id="histogram">{{ plots.histogram|safe }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card plot-card">
+                    <div class="card-body">
+                        <div id="violin">{{ plots.violin|safe }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info">Введите значения и проведите испытание</div>
+    {% endif %}
+    </div>
+</div>
+{% endblock %}

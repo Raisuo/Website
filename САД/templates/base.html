@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}САД{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">САД</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <!-- Сравнение групп (Group Comparison) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="groupComparisonDropdown" role="button" data-bs-toggle="dropdown">
+                            Сравнение групп
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="groupComparisonDropdown">
+                            <li><a class="dropdown-item {% if active_page == 'anova' %}active{% endif %}" href="/anova">ANOVA <span class="text-white">(Analysis of Variance)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'tukey' %}active{% endif %}" href="/tukey">Тьюки <span class="text-white">(Honest Significant Difference)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'ttest' %}active{% endif %}" href="/ttest">T-тест <span class="text-white">(Student's t-test)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'mannwhitney' %}active{% endif %}" href="/mannwhitney">U-тест Манна-Уитни <span class="text-white">(Mann-Whitney U test)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'levene' %}active{% endif %}" href="/levene">Тест Левена <span class="text-white">(Levene's test)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'fisher' %}active{% endif %}" href="/fisher">Точный тест Фишера <span class="text-white">(Fisher's exact test)</span></a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Корреляция (Correlation) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="correlationDropdown" role="button" data-bs-toggle="dropdown">
+                            Корреляция
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="correlationDropdown">
+                            <li><a class="dropdown-item {% if active_page == 'pearson' %}active{% endif %}" href="/pearson">Корреляция Пирсона <span class="text-white">(Pearson)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'spearman' %}active{% endif %}" href="/spearman">Корреляция Спирмена <span class="text-white">(Spearman)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'kendall' %}active{% endif %}" href="/kendall">Корреляция Кендалла <span class="text-white">(Kendall)</span></a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Регрессия (Regression) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="regressionDropdown" role="button" data-bs-toggle="dropdown">
+                            Регрессия
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="regressionDropdown">
+                            <li><a class="dropdown-item {% if active_page == 'linear_regression' %}active{% endif %}" href="/linear_regression">Линейная регрессия <span class="text-white">(Linear Regression)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'polynomial_regression' %}active{% endif %}" href="/polynomial_regression">Полиномиальная регрессия <span class="text-white">(Polynomial Regression)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'logistic_regression' %}active{% endif %}" href="/logistic_regression">Логистическая регрессия <span class="text-white">(Logistic Regression)</span></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item {% if active_page == 'ridge_regression' %}active{% endif %}" href="/ridge_regression">Гребневая регрессия <span class="text-white">(Ridge Regression)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'lasso_regression' %}active{% endif %}" href="/lasso_regression">Регрессия Лассо<span class="text-white">(Lasso Regression)</span></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item {% if active_page == 'svr_regression' %}active{% endif %}" href="/svr_regression">Регрессия опорных векторов <span class="text-white">(Support Vector Regression)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'random_forest_regression' %}active{% endif %}" href="/random_forest_regression">Регрессия случайного леса <span class="text-white">(Random Forest Regression)</span></a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Описательная статистика (Descriptive Stats) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="descriptiveStatsDropdown" role="button" data-bs-toggle="dropdown">
+                            Описательная статистика
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="descriptiveStatsDropdown">
+                            <li><a class="dropdown-item {% if active_page == 'shapiro_wilk' %}active{% endif %}" href="/shapiro_wilk">Тест Шапиро-Уилка <span class="text-white">(Shapiro-Wilk test)</span></a></li>
+                            <li><a class="dropdown-item {% if active_page == 'iqr' %}active{% endif %}" href="/iqr">Межквартильный размах <span class="text-white">(Interquartile Range)</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid dashboard-container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function checkPlotly() {
+            if (typeof Plotly === 'undefined') {
+                console.error('Plotly.js не загружен! Повторная загрузка...');
+                const plotlyScript = document.createElement('script');
+                plotlyScript.src = 'https://cdn.plot.ly/plotly-latest.min.js';
+                plotlyScript.onload = redrawPlots;
+                document.head.appendChild(plotlyScript);
+            } else {
+                redrawPlots();
+            }
+        }
+
+        function redrawPlots() {
+            document.querySelectorAll('.plotly-graph-div').forEach(plot => {
+                Plotly.Purge(plot);
+                Plotly.newPlot(plot, plot.data, plot.layout);
+            });
+        }
+
+        checkPlotly();
+    });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

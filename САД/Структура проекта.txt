@@ -1,0 +1,48 @@
+САД/
+├── app.py
+├── static/
+│   └── styles.css
+└── templates/
+    ├── base.html
+    ├── index.html
+    ├── correlation/
+    │   ├── kendall.html
+    │   ├── pearson.html
+    │   └── spearman.html
+    ├── descriptive_stats/
+    │   ├── iqr.html
+    │   └── shapiro_wilk.html
+    ├── group_comparison/
+    │   ├── anova.html
+    │   ├── fisher.html
+    │   ├── levene.html
+    │   ├── mannwhitney.html
+    │   ├── ttest.html
+    │   └── tukey.html
+    ├── regression/
+    │   ├── lasso.html
+    │   ├── linear.html
+    │   ├── logistic.html
+    │   ├── polynomial.html
+    │   ├── random_forest.html
+    │   ├── ridge.html
+    └── └── svr.html	
+====
+Пояснение:
+app.py — главный файл приложения (Flask/Django или другой фреймворк).
+
+static/styles.css — стили для веб-страниц.
+
+templates/base.html — базовый шаблон для наследования.
+
+templates/index.html — главная страница.
+
+Подпапки в templates содержат HTML-файлы для разных разделов аналитики:
+
+correlation — корреляционный анализ,
+
+descriptive_stats — описательная статистика,
+
+group_comparison — сравнение групп,
+
+regression — регрессионные модели,

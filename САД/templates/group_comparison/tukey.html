@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Тест Тьюки (Honestly Significant Difference){% endblock %}
+{% block content %}
+<style>
+    /* Стили для улучшения отображения таблицы результатов */
+    .result-table-wrapper {
+        /* Позволяет добавить прокрутку внутри карточки, если таблица очень широкая */
+        /* max-height: 400px; */ /* Раскомментируйте, если нужна вертикальная прокрутка */
+        /* overflow-y: auto; */   /* Раскомментируйте, если нужна вертикальная прокрутка */
+    }
+    .result-table-wrapper table {
+        width: 100% !important; /* Принудительно растягиваем таблицу на 100% ширины родителя */
+        table-layout: auto;     /* Позволяет столбцам подстраиваться под содержимое */
+        word-wrap: break-word;  /* Перенос слов, если заголовки слишком длинные */
+        /* min-width: 600px; */ /* Минимальная ширина, чтобы таблица не сжималась слишком сильно */
+                                 /* Раскомментируйте и настройте при необходимости */
+    }
+    /* Улучшаем внешний вид таблицы statsmodels */
+    .result-table-wrapper th,
+    .result-table-wrapper td {
+        padding: 8px 12px !important; /* Увеличиваем отступы */
+        text-align: left !important;
+        vertical-align: top !important;
+        border: 1px solid #dee2e6 !important; /* Добавляем границы ячеек */
+    }
+    .result-table-wrapper thead th {
+        background-color: #f8f9fa !important; /* Цвет фона заголовка */
+        position: sticky; /* Закрепляем заголовок при прокрутке (если будет) */
+        top: 0;
+    }
+    .result-table-wrapper tbody tr:nth-child(even) {
+         background-color: #f8f9fa; /* Цвет фона четных строк */
+    }
+</style>
+
+<h2 class="mb-4">Тест Тьюки (Honest Significant Difference)</h2>
+<div class="row equal-height-row">
+
+    <!-- Изменено col-md-4 на col-md-5 -->
+    <div class="col-md-5">
+        <div class="card data-input-card" style="overflow-y: auto; max-height: 80vh;">
+            <div class="card-header">Ввод</div>
+            <div class="card-body">
+                <form method="post" id="tukeyForm" enctype="multipart/form-data">
+                    <div id="data-groups-container">
+                        {% for i in range(initial_groups|length) %}
+                        <div class="data-group mb-3">
+                            <label class="form-label">Ряд {{ i + 1 }}</label>
+                            <input type="text" name="group{{ i + 1 }}" class="form-control"
+                                   value="{{ initial_groups[i] }}"
+                                   placeholder="Введите значения через запятую">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm me-2" onclick="addGroupInput()">Добавить ряд</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="removeGroupInput()">Убрать ряд</button>
+				<hr>
+                <h5>Или загрузите данные из файла:</h5>
+				<p>Форматы: CSV, XLS или XLSX. Первая строка считается заголовком. Каждая колонка считается за ряд.</p>
+                <input type="file" name="data_file" class="form-control">
+                    <button type="submit" class="btn btn-primary">Провести испытание</button>
+                </form>
+            </div>
+        </div>
+
+        {% if tukey_result %}
+        <div class="card result-card mt-3"> <!-- Добавлен отступ сверху -->
+            <div class="card-header">Результаты</div>
+            <div class="card-body">
+                <!-- Обернули таблицу в дополнительный div с классом для стилей -->
+                <div class="table-responsive result-table-wrapper">
+                    {{ tukey_result|safe }}
+                </div>
+                <p class="text-muted"><strong>Вывод:</strong> {{ tukey_conclusion }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Изменено col-md-8 на col-md-7 -->
+    <div class="col-md-7">
+        {% if plots and plots.tukeyplot %}
+        <div class="card plot-card h-100"> <!-- h-100 для одинаковой высоты -->
+            <div class="card-header">График</div>
+            <div class="card-body">
+                <div class="plot-container" id="tukeyPlot">
+                    {{ plots.tukeyplot|safe }}
+                </div>
+            </div>
+        </div>
+        {% elif tukey_result %}
+        <div class="alert alert-warning">
+            Could not generate visualization. Please check your input data.
+            {% if debug %}
+            <pre>Debug info: {{ plots|tojson|safe }}</pre>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            Введите значения и проведите испытание
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+let groupCount = {{ initial_groups|length }};
+function addGroupInput() {
+    const container = document.getElementById('data-groups-container');
+    groupCount++;
+    const newGroup = document.createElement('div');
+    newGroup.className = 'data-group mb-3';
+    newGroup.innerHTML = `
+        <label class="form-label">Ряд ${groupCount}</label>
+        <input type="text" name="group${groupCount}" class="form-control"
+               placeholder="Введите значения через запятую">
+    `;
+    container.appendChild(newGroup);
+    // container.scrollTop = container.scrollHeight; // Не всегда нужно
+}
+function removeGroupInput() {
+    const container = document.getElementById('data-groups-container');
+    if (container.querySelectorAll('.data-group').length > 2) {
+        container.removeChild(container.lastElementChild);
+        groupCount--;
+    }
+}
+// Обработчик отправки формы не нужен для переименования, так как сервер
+// уже обрабатывает поля group1, group2 и т.д. правильно.
+// document.getElementById('tukeyForm')?.addEventListener('submit', function() {
+//     // Этот код не требуется, так как сервер ожидает group1, group2 и т.д.
+//     // и они генерируются правильно при создании/удалении полей.
+// });
+</script>
+{% endblock %}

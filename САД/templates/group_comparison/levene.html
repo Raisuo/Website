@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Тест Левена для оценки равенства дисперсий{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Тест Левена для оценки равенства дисперсий</h2>
+<div class="row equal-height-row">
+    <div class="col-md-4">
+        <div class="card data-input-card" style="overflow-y: auto; max-height: 80vh;">
+            <div class="card-header">Ввод</div>
+            <div class="card-body">
+                <form method="post" id="leveneForm" enctype="multipart/form-data">
+                    <div id="data-groups-container">
+                        {% for i in range(initial_groups|length) %}
+                        <div class="data-group mb-3">
+                            <label class="form-label">Ряд {{ i + 1 }}</label>
+                            <input type="text" name="group{{ i + 1 }}" class="form-control" value="{{ initial_groups[i] }}" placeholder="Введите значения через запятую">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm me-2" onclick="addGroupInput()">Добавить ряд</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="removeGroupInput()">Убрать ряд</button>
+				<hr>
+                <h5>Или загрузите данные из файла:</h5>
+				<p>Форматы: CSV, XLS или XLSX. Первая строка считается заголовком. Каждая колонка считается за ряд.</p>
+                <input type="file" name="data_file" class="form-control">
+                    <button type="submit" class="btn btn-primary">Провести испытание</button>
+                </form>
+            </div>
+        </div>
+        {% if result %}
+        <div class="card result-card">
+            <div class="card-header">Результаты</div>
+            <div class="card-body">
+                <p><strong>W-критерий:</strong> {{ "%.4f"|format(result.statistic) }}</p>
+                <p><strong>p-значение:</strong> {{ "%.4f"|format(result.pvalue) }}</p>
+                <p class="text-{% if result.pvalue < 0.05 %}danger{% else %}success{% endif %}"><strong>Вывод:</strong> {{ conclusion }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-8">
+        {% if plots %}
+         <div class="card plot-card">
+            <div class="card-body">
+                 <div id="summaryPlot">{{ plots.summary_plot|safe }}</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card plot-card">
+                    <div class="card-body">
+                        <div id="boxplot">{{ plots.boxplot|safe }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card plot-card">
+                    <div class="card-body">
+                        <div id="distPlot">{{ plots.distribution_plot|safe }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">Введите значения и проведите испытание</div>
+        {% endif %}
+    </div>
+</div>
+<script>
+let groupCount = {{ initial_groups|length }};
+
+function addGroupInput() {
+    const container = document.getElementById('data-groups-container');
+    groupCount++;
+    const newGroup = document.createElement('div');
+    newGroup.className = 'data-group mb-3';
+    newGroup.innerHTML = `
+        <label class="form-label">Ряд ${groupCount}</label>
+        <input type="text" name="group${groupCount}" class="form-control" 
+               placeholder="Введите значения через запятую">
+    `;
+    container.appendChild(newGroup);
+    container.scrollTop = container.scrollHeight;
+}
+
+function removeGroupInput() {
+    const container = document.getElementById('data-groups-container');
+    if (container.querySelectorAll('.data-group').length > 2) {
+        container.removeChild(container.lastElementChild);
+        groupCount--;
+    }
+}
+
+document.getElementById('leveneForm')?.addEventListener('submit', function() {
+    const groups = document.querySelectorAll('.data-group');
+    groups.forEach((group, index) => {
+        const input = group.querySelector('input');
+        input.name = `group${index + 1}`;
+        group.querySelector('label').textContent = `Group ${index + 1}`;
+    });
+    groupCount = groups.length;
+});
+</script>
+{% endblock %}

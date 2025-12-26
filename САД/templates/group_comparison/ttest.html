@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Двухвыборочный t-тест{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Двухвыборочный t-тест</h2>
+<div class="row equal-height-row">
+    <div class="col-md-4">
+        <div class="card data-input-card" style="overflow-y: auto; max-height: 80vh;">
+            <div class="card-header">Ввод</div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Первый ряд</label>
+                        <input type="text" name="group1" class="form-control" value="{{ group1 }}" placeholder="Введите значения через запятую">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Второй ряд</label>
+                        <input type="text" name="group2" class="form-control" value="{{ group2 }}" placeholder="Введите значения через запятую">
+                    </div>
+				<hr>
+                <h5>Или загрузите данные из файла:</h5>
+				<p>Форматы: CSV, XLS или XLSX. Первая строка считается заголовком. Сравнивается до 20 значений из первых двух колонок.</p>
+                <input type="file" name="data_file" class="form-control">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="equal_var" id="equalVarCheck" {% if equal_var %}checked{% endif %}>
+                        <label class="form-check-label" for="equalVarCheck">Дисперсии равны</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Провести испытание</button>
+                </form>
+            </div>
+        </div>
+        {% if result %}
+        <div class="card result-card">
+            <div class="card-header">Результаты</div>
+            <div class="card-body">
+                <p><strong>t-критерий:</strong> {{ "%.4f"|format(result.statistic) }}</p>
+                <p><strong>p-значение:</strong> {{ "%.4f"|format(result.pvalue) }}</p>
+                <p class="text-{% if result.pvalue < 0.05 %}danger{% else %}success{% endif %}"><strong>Вывод:</strong> {{ conclusion }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-8">
+        {% if plots %}
+        <div class="card plot-card">
+            <div class="card-body">
+                <div id="boxplot">{{ plots.boxplot|safe }}</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card plot-card">
+                    <div class="card-body">
+                        <div id="histogram">{{ plots.histogram|safe }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">Введите значения и проведите испытание</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
